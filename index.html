@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Guide communautaire francophone non officiel pour apprendre GameMaker et le GML par la pratique.">
+  <title>GameMaker en pratique</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+
+  <header>
+    <div class="hero">
+      <p class="eyebrow">Guide communautaire francophone non officiel</p>
+      <h1>GameMaker en pratique</h1>
+      <p class="hero-text">Un petit manuel pour comprendre le GML, tester ses idées et apprendre à corriger ses propres erreurs. Le code est important, mais le raisonnement l'est encore plus.</p>
+      <div class="hero-links">
+        <a class="button primary" href="#commencer">Commencer le guide</a>
+        <a class="button" href="https://manual.gamemaker.io/monthly/en/">Manuel officiel</a>
+        <a class="button" href="https://github.com/Lysdora/guide-gamemaker-fr">Code sur GitHub</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav aria-label="Sommaire">
+      <strong>Sommaire</strong>
+      <a href="#commencer">Comment apprendre avec ce guide</a>
+      <a href="#fondations">Les briques de GameMaker</a>
+      <a href="#gml">Premiers repères en GML</a>
+      <a href="#mouvement">Déplacement top-down</a>
+      <a href="#animation">Direction et animation</a>
+      <a href="#fonctions">Fonctions et paramètres</a>
+      <a href="#camera">Caméra et pixel art</a>
+      <a href="#collisions">Premières collisions</a>
+      <a href="#interface">Interface et Draw GUI</a>
+      <a href="#degats">Dégâts et Game Over</a>
+      <a href="#git">Git avec GameMaker</a>
+      <a href="#suite">Pour continuer</a>
+    </nav>
+
+    <main id="contenu">
+      <section class="chapter" id="commencer">
+        <span class="tag">Point de départ</span>
+        <h2>Comment apprendre avec ce guide</h2>
+        <p>Ce manuel n'est pas une liste de blocs à copier. Le but est de t'aider à passer de « je reconnais ce code » à « je sais le reconstruire et expliquer pourquoi il fonctionne ».</p>
+
+        <h3>Une méthode simple</h3>
+        <ol>
+          <li>Lis une petite partie sans ouvrir GameMaker.</li>
+          <li>Prédis le résultat du code.</li>
+          <li>Teste-le dans un projet minuscule.</li>
+          <li>Change une valeur et observe ce qui se passe.</li>
+          <li>Refais l'exercice sans regarder la solution.</li>
+          <li>Consulte le manuel officiel pour vérifier les détails.</li>
+        </ol>
+
+        <div class="note">
+          <strong>Une erreur comprise est utile.</strong> Un code copié qui fonctionne sans que tu saches pourquoi sera beaucoup plus difficile à modifier plus tard.
+        </div>
+
+        <h3>Quand tu bloques</h3>
+        <p>Réduis le problème. Affiche une variable, désactive temporairement une animation, retire un obstacle ou teste une seule direction. Le debug consiste souvent à enlever des inconnues jusqu'à ce qu'il ne reste qu'une cause possible.</p>
+      </section>
+
+      <section class="chapter" id="fondations">
+        <span class="tag">Leçon 1</span>
+        <h2>Les briques de GameMaker</h2>
+
+        <table>
+          <thead>
+            <tr><th>Élément</th><th>Rôle</th><th>Exemple</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Sprite</td><td>Une image ou une animation. Il ne contient pas la logique du jeu.</td><td><code>spr_player_idle</code></td></tr>
+            <tr><td>Objet</td><td>Un modèle qui contient des événements et des variables.</td><td><code>obj_player</code></td></tr>
+            <tr><td>Instance</td><td>Une copie vivante d'un objet, placée ou créée dans une room.</td><td>Le joueur présent dans le niveau</td></tr>
+            <tr><td>Room</td><td>Un espace qui contient des calques, des instances, des tilemaps et une caméra.</td><td><code>rm_level</code></td></tr>
+            <tr><td>Événement</td><td>Un moment où GameMaker exécute du code.</td><td>Create, Step, Draw, Collision</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Create et Step</h3>
+        <p>L'événement Create s'exécute lorsque l'instance apparaît. C'est un bon endroit pour initialiser ses variables.</p>
+
+        <pre><code>// Create de obj_player
+move_speed = 2;
+hp = 3;
+facing = "down";</code></pre>
+
+        <p>Le Step s'exécute à chaque cycle du jeu. On y lit souvent les commandes et on met à jour la logique.</p>
+
+        <div class="warning">
+          <strong>Objet et instance ne sont pas synonymes.</strong> Tu peux créer un seul objet <code>obj_enemy</code> et placer vingt instances différentes de cet objet dans une room.
+        </div>
+
+        <div class="official">
+          Documentation officielle : <a href="https://manual.gamemaker.io/monthly/en/Quick_Start_Guide/Objects_And_Instances.htm">Objects and Instances</a>.
+        </div>
+      </section>
+
+      <section class="chapter" id="gml">
+        <span class="tag">Leçon 2</span>
+        <h2>Premiers repères en GML</h2>
+
+        <h3>Une variable conserve une valeur</h3>
+        <pre><code>hp = 3;
+name = "Player";
+is_dead = false;</code></pre>
+
+        <p>Les noms décrivent le rôle des valeurs. Une variable comme <code>hp</code> peut changer au fil de la partie. Une variable comme <code>max_hp</code> peut servir de limite.</p>
+
+        <h3>Variable d'instance ou variable locale</h3>
+        <pre><code>// Variable d'instance, encore disponible au prochain Step
+facing = "right";
+
+// Variable locale, limitée au bloc de code actuel
+var _horizontal = 1;</code></pre>
+
+        <p>Le préfixe souligné n'est pas imposé par GameMaker. C'est une convention pratique pour reconnaître rapidement une variable locale.</p>
+
+        <h3>Une condition choisit un chemin</h3>
+        <pre><code>if (hp &lt;= 0)
+{
+    is_dead = true;
+}</code></pre>
+
+        <h3>Le point-virgule</h3>
+        <p>Le point-virgule marque la fin d'une instruction. GameMaker accepte parfois son absence, mais l'utiliser régulièrement rend le code plus lisible et évite des surprises.</p>
+
+        <div class="exercise">
+          <strong>Petit exercice.</strong> Crée trois variables dans Create, affiche-les avec <code>show_debug_message()</code>, puis modifie une valeur dans Step quand tu appuies sur une touche.
+        </div>
+
+        <div class="official">
+          Documentation officielle : <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Overview/Variables_And_Variable_Scope.htm">Variables and Variable Scope</a>.
+        </div>
+      </section>
+
+      <section class="chapter" id="mouvement">
+        <span class="tag">Leçon 3</span>
+        <h2>Créer un déplacement top-down</h2>
+
+        <h3>Lire ZQSD</h3>
+        <pre><code>var _horizontal = keyboard_check(ord("D")) - keyboard_check(ord("Q"));
+var _vertical = keyboard_check(ord("S")) - keyboard_check(ord("Z"));</code></pre>
+
+        <p>Chaque appel retourne zéro ou un. La soustraction donne donc une valeur comprise entre moins un et un.</p>
+
+        <table>
+          <thead><tr><th>Touches</th><th>Valeur horizontale</th></tr></thead>
+          <tbody>
+            <tr><td>Aucune</td><td><code>0</code></td></tr>
+            <tr><td><kbd>D</kbd></td><td><code>1</code></td></tr>
+            <tr><td><kbd>Q</kbd></td><td><code>-1</code></td></tr>
+            <tr><td><kbd>Q</kbd> et <kbd>D</kbd></td><td><code>0</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>Le piège de la diagonale</h3>
+        <p>Ajouter directement la valeur horizontale et la valeur verticale fait parcourir davantage de distance en diagonale. On peut transformer le vecteur d'entrée en angle, puis utiliser une longueur constante.</p>
+
+        <pre><code>if (_horizontal != 0 or _vertical != 0)
+{
+    var _direction = point_direction(0, 0, _horizontal, _vertical);
+
+    x += lengthdir_x(move_speed, _direction);
+    y += lengthdir_y(move_speed, _direction);
+}</code></pre>
+
+        <p>Avec ce système, <code>move_speed</code> représente la distance totale parcourue, quelle que soit la direction.</p>
+
+        <h3>Observer les angles</h3>
+        <pre><code>show_debug_message(_direction);</code></pre>
+
+        <p>Place ce message dans le bloc où <code>_direction</code> est créée, car cette variable locale n'existe pas en dehors de ce bloc. Dans GameMaker, la droite correspond à 0 degrés, le haut à 90, la gauche à 180 et le bas à 270.</p>
+
+        <div class="exercise">
+          <strong>À tester.</strong> Affiche la direction dans la console et vérifie les quatre directions. Essaie ensuite deux touches à la fois et note les valeurs obtenues.
+        </div>
+
+        <div class="official">
+          Documentation officielle : <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Game_Input/Keyboard_Input/Keyboard_Input.htm">Keyboard Input</a> et <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Maths_And_Numbers/Angles_And_Distance/point_direction.htm">point_direction()</a>.
+        </div>
+      </section>
+
+      <section class="chapter" id="animation">
+        <span class="tag">Leçon 4</span>
+        <h2>Mémoriser la direction et choisir une animation</h2>
+
+        <p>Changer le sprite pendant le mouvement ne suffit pas à savoir quelle direction afficher quand le personnage s'arrête. Il faut conserver cette information dans une variable d'instance.</p>
+
+        <pre><code>// Create
+facing = "down";</code></pre>
+
+        <pre><code>// Step
+if (_horizontal &gt; 0)
+{
+    sprite_index = spr_player_walk_right;
+    facing = "right";
+}
+else if (_horizontal &lt; 0)
+{
+    sprite_index = spr_player_walk_left;
+    facing = "left";
+}</code></pre>
+
+        <p>À l'arrêt, un <code>switch</code> peut choisir le sprite idle à partir de la dernière valeur mémorisée.</p>
+
+        <pre><code>switch (facing)
+{
+    case "right":
+        sprite_index = spr_player_idle_right;
+    break;
+
+    case "left":
+        sprite_index = spr_player_idle_left;
+    break;
+
+    case "up":
+        sprite_index = spr_player_idle_up;
+    break;
+
+    default:
+        sprite_index = spr_player_idle_down;
+    break;
+}</code></pre>
+
+        <div class="warning">
+          <strong>Erreur fréquente.</strong> Le sprite de marche change correctement, mais <code>facing</code> reste toujours égal à <code>"down"</code>. Dans ce cas, le personnage revient vers le bas dès qu'il s'arrête.
+        </div>
+
+        <p>Pour diagnostiquer ce problème, affiche la variable au moment de l'arrêt :</p>
+
+        <pre><code>show_debug_message("facing = " + string(facing));</code></pre>
+
+        <div class="official">
+          Documentation officielle : <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Overview/Language_Features/switch.htm">switch</a> et <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Asset_Management/Instances/Instance_Variables/sprite_index.htm">sprite_index</a>.
+        </div>
+      </section>
+
+      <section class="chapter" id="fonctions">
+        <span class="tag">Leçon 5</span>
+        <h2>Séparer le code avec une fonction</h2>
+
+        <p>Quand le Step commence à gérer la mort, les commandes, le mouvement, les animations et les collisions, il devient difficile à relire. Une fonction peut isoler une responsabilité précise.</p>
+
+        <pre><code>function update_animation(_horizontal, _vertical)
+{
+    if (_horizontal &gt; 0)
+    {
+        sprite_index = spr_player_walk_right;
+        facing = "right";
+    }
+    else if (_horizontal == 0 and _vertical == 0)
+    {
+        // Choisir ici le sprite idle avec facing
+    }
+}</code></pre>
+
+        <p>Le Step calcule les entrées, puis les transmet :</p>
+
+        <pre><code>update_animation(_horizontal, _vertical);</code></pre>
+
+        <h3>Pourquoi passer des paramètres</h3>
+        <p>Une variable déclarée avec <code>var</code> dans le Step est locale à ce bloc. La fonction ne la reçoit pas par magie. Les paramètres rendent les dépendances visibles.</p>
+
+        <div class="warning">
+          <strong>Erreur fréquente.</strong> Un <code>else</code> placé après l'accolade qui ferme la fonction n'a plus de <code>if</code> auquel se rattacher. Quand le compilateur indique une erreur près d'une accolade, vérifie aussi les lignes précédentes.
+        </div>
+
+        <div class="exercise">
+          <strong>Exercice.</strong> Commence avec une fonction qui affiche seulement « marche » ou « idle ». Quand ce test fonctionne, déplace progressivement le choix des sprites dans la fonction.
+        </div>
+      </section>
+
+      <section class="chapter" id="camera">
+        <span class="tag">Leçon 6</span>
+        <h2>Caméra, sous-pixels et pixel art</h2>
+
+        <p>Un déplacement diagonal normalisé produit souvent des coordonnées décimales. C'est normal pour la logique du jeu, mais cela peut créer un tremblement visuel avec une caméra qui suit le personnage.</p>
+
+        <pre><code>x = 290.99;
+y = 95.16;</code></pre>
+
+        <h3>Diagnostiquer avant de corriger</h3>
+        <ol>
+          <li>Fige l'animation. Si le tremblement reste présent, l'animation n'est probablement pas la cause.</li>
+          <li>Désactive le suivi de caméra. Si le tremblement disparaît, la caméra est impliquée.</li>
+          <li>Affiche les coordonnées pour vérifier si le mouvement produit des fractions de pixel.</li>
+        </ol>
+
+        <h3>Garder une position logique précise</h3>
+        <p>Il ne faut pas forcément arrondir directement <code>x</code> et <code>y</code>. Cela changerait le déplacement. On peut arrondir uniquement le dessin.</p>
+
+        <pre><code>// Draw de obj_player
+draw_sprite(
+    sprite_index,
+    image_index,
+    round(x),
+    round(y)
+);</code></pre>
+
+        <p>La position logique reste décimale pour les mouvements et les collisions. La position visuelle reste alignée sur la grille de pixels.</p>
+
+        <h3>Une caméra contrôlée dans End Step</h3>
+        <pre><code>var _camera = view_get_camera(0);
+var _view_width = camera_get_view_width(_camera);
+var _view_height = camera_get_view_height(_camera);
+
+var _camera_x = round(obj_player.x - _view_width / 2);
+var _camera_y = round(obj_player.y - _view_height / 2);
+
+camera_set_view_pos(_camera, _camera_x, _camera_y);</code></pre>
+
+        <p>Une version complète doit aussi empêcher la caméra de sortir de la room avec <code>clamp()</code>. Le End Step est utile car il s'exécute après le déplacement normal du joueur.</p>
+
+        <div class="note">
+          Pour un rendu net, une vue logique de 320 par 180 peut être agrandie en 1280 par 720. Le facteur est exactement égal à quatre.
+        </div>
+
+        <div class="official">
+          Documentation officielle : <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Cameras_And_Display/Cameras_And_Viewports/camera_set_view_pos.htm">camera_set_view_pos()</a> et <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Drawing/Sprites_And_Tiles/draw_sprite.htm">draw_sprite()</a>.
+        </div>
+      </section>
+
+      <section class="chapter" id="collisions">
+        <span class="tag">Leçon 7</span>
+        <h2>Premières collisions avec objets et tilemaps</h2>
+
+        <p><code>place_meeting()</code> pose une question : si l'instance était à cette position, rencontrerait-elle un obstacle ? La fonction retourne vrai ou faux, mais elle ne déplace rien.</p>
+
+        <pre><code>if (!place_meeting(x + _dx, y, obj_solid))
+{
+    x += _dx;
+}</code></pre>
+
+        <p><code>move_and_collide()</code> tente de déplacer l'instance et ajuste son mouvement lorsqu'elle rencontre l'obstacle donné.</p>
+
+        <pre><code>move_and_collide(_dx, _dy, obj_solid);</code></pre>
+
+        <h3>Collision avec une tilemap</h3>
+        <p>Une couche de tiles n'est pas un objet. Il faut d'abord récupérer son identifiant.</p>
+
+        <pre><code>// Create
+collision_tilemap = layer_tilemap_get_id("Tiles_Collision");</code></pre>
+
+        <pre><code>// Step
+move_and_collide(_dx, _dy, collision_tilemap);</code></pre>
+
+        <p>Le nom de couche doit correspondre exactement au nom utilisé dans la room. Le tileset doit également posséder un sprite source et un masque utilisable pour les collisions.</p>
+
+        <div class="warning">
+          Stocker seulement la chaîne <code>"Tiles_Collision"</code> ne donne pas un Tile Map ID. La chaîne sert à rechercher la couche avec <code>layer_tilemap_get_id()</code>.
+        </div>
+
+        <div class="exercise">
+          <strong>Protocole de test.</strong> Approche un bord horizontalement, verticalement puis en diagonale. Vérifie ensuite les coins et les vitesses plus élevées.
+        </div>
+
+        <div class="official">
+          Documentation officielle : <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Movement_And_Collisions/Collisions/place_meeting.htm">place_meeting()</a>, <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Movement_And_Collisions/Movement/move_and_collide.htm">move_and_collide()</a> et <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Movement_And_Collisions/Collisions/Collisions.htm">Collisions</a>.
+        </div>
+      </section>
+
+      <section class="chapter" id="interface">
+        <span class="tag">Leçon 8</span>
+        <h2>Afficher les PV dans Draw GUI</h2>
+
+        <p>Le Draw GUI utilise une surface d'interface qui ne se déplace pas avec la caméra. C'est l'endroit naturel pour les PV, le score et les menus.</p>
+
+        <pre><code>if (instance_exists(obj_player))
+{
+    for (var i = 0; i &lt; obj_player.hp; i++)
+    {
+        draw_sprite(spr_health, 0, 8 + i * 18, 8);
+    }
+}</code></pre>
+
+        <p>La boucle commence à zéro. Tant que <code>i</code> reste inférieur aux PV, une nouvelle icône est dessinée. Le terme <code>i * 18</code> décale chaque icône.</p>
+
+        <h3>Pourquoi vérifier l'existence du joueur</h3>
+        <p>Une future room de titre peut ne contenir aucun joueur. Sans vérification, lire <code>obj_player.hp</code> pourrait provoquer une erreur.</p>
+
+        <h3>État du dessin</h3>
+        <pre><code>draw_set_alpha(0.75);
+draw_set_colour(c_black);
+draw_rectangle(0, 0, 320, 180, false);
+
+draw_set_alpha(1);
+draw_set_colour(c_white);</code></pre>
+
+        <p>Changer l'alpha ou la couleur affecte les dessins suivants. Il est donc utile de remettre un état connu avant de dessiner le reste de l'interface.</p>
+
+        <div class="official">
+          Documentation officielle : <a href="https://manual.gamemaker.io/monthly/en/Quick_Start_Guide/Drawing.htm">Drawing and the GUI Layer</a> et <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Drawing/Sprites_And_Tiles/draw_sprite.htm">draw_sprite()</a>.
+        </div>
+      </section>
+
+      <section class="chapter" id="degats">
+        <span class="tag">Leçon 9</span>
+        <h2>Dégâts, invincibilité et Game Over</h2>
+
+        <p>Après un dégât, une courte invincibilité évite de retirer tous les PV pendant plusieurs frames de collision.</p>
+
+        <pre><code>// Create du joueur
+hp = 3;
+max_hp = 3;
+invincibility = 0;
+is_dead = false;</code></pre>
+
+        <pre><code>// Lors d'un dégât
+if (other.invincibility &lt;= 0)
+{
+    other.hp = max(0, other.hp - 1);
+    other.invincibility = 60;
+
+    if (other.hp &lt;= 0)
+    {
+        other.is_dead = true;
+    }
+}</code></pre>
+
+        <p>À 60 steps par seconde, une valeur de 60 représente environ une seconde. Cela reste un réglage de game design, pas une règle absolue.</p>
+
+        <h3>Arrêter le Step après la mort</h3>
+        <pre><code>if (is_dead)
+{
+    visible = true;
+
+    if (keyboard_check_pressed(ord("R")))
+    {
+        room_restart();
+    }
+
+    exit;
+}</code></pre>
+
+        <p><code>exit</code> arrête l'événement actuel. Il ne ferme pas le jeu. À la frame suivante, le Step recommence depuis sa première ligne.</p>
+
+        <div class="warning">
+          <strong>Erreur fréquente avec max.</strong> <code>max(0, hp, -1)</code> conserve souvent les PV actuels, car ils sont la plus grande valeur. Pour retirer un PV, la soustraction doit se trouver dans l'argument : <code>max(0, hp - 1)</code>.
+        </div>
+
+        <div class="exercise">
+          <strong>À vérifier.</strong> Teste la suite 3, 2, 1, 0. Vérifie que le joueur ne bouge plus, que le texte apparaît et que <kbd>R</kbd> remet correctement les variables à leur état initial.
+        </div>
+      </section>
+
+      <section class="chapter" id="git">
+        <span class="tag">Leçon 10</span>
+        <h2>Versionner un projet GameMaker avec Git</h2>
+
+        <p>GameMaker fournit une interface de contrôle de source, mais le moteur utilise le véritable Git installé sur la machine.</p>
+
+        <table>
+          <thead><tr><th>Action</th><th>Rôle</th></tr></thead>
+          <tbody>
+            <tr><td>Save All</td><td>Sauvegarder les ressources GameMaker sur le disque.</td></tr>
+            <tr><td>Stage</td><td>Choisir les changements du prochain commit.</td></tr>
+            <tr><td>Commit</td><td>Créer un point d'historique local.</td></tr>
+            <tr><td>Push</td><td>Envoyer les commits locaux vers le dépôt distant.</td></tr>
+            <tr><td>Pull</td><td>Récupérer les changements du dépôt distant.</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Un commit raconte une étape</h3>
+        <pre><code>Add player movement
+Add health display
+Fix pixel art camera jitter</code></pre>
+
+        <p>Un bon commit regroupe une modification cohérente et testée. Il n'est pas nécessaire d'attendre la fin de la journée.</p>
+
+        <h3>Précaution avec les outils externes</h3>
+        <p>Avant un pull, un changement de branche ou une modification extérieure des fichiers, sauvegarde et ferme le projet dans GameMaker. Tu peux laisser l'IDE ouvert sur sa page d'accueil.</p>
+
+        <div class="official">
+          Documentation officielle : <a href="https://gamemaker.io/en/help/articles/setting-up-and-using-source-control">Setting Up And Using Source Control</a>.
+        </div>
+      </section>
+
+      <section class="chapter" id="suite">
+        <span class="tag">Et maintenant</span>
+        <h2>Pour continuer</h2>
+
+        <p>Cette première version pose les fondations. Les prochaines leçons prévues concernent :</p>
+
+        <ul>
+          <li>les parents et les objets solides ;</li>
+          <li>les projectiles et les ramassables ;</li>
+          <li>les machines à états ;</li>
+          <li>les ennemis et la poursuite ;</li>
+          <li>les inventaires simples ;</li>
+          <li>les sons et la musique ;</li>
+          <li>les sauvegardes ;</li>
+          <li>la création d'un exécutable ;</li>
+          <li>un mini-projet complet à reconstruire sans modèle.</li>
+        </ul>
+
+        <details>
+          <summary>Rappel avant de passer à la suite</summary>
+          <p>Si tu ne peux pas expliquer une variable ou reconstruire un système simple sans regarder, il vaut mieux refaire un petit exercice que d'empiler une nouvelle fonctionnalité.</p>
+        </details>
+
+        <p>Le guide est un projet vivant. Les corrections et les retours de débutants sont utiles, surtout quand une explication semble évidente pour l'auteur mais pas pour le lecteur.</p>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <p>GameMaker en pratique, guide communautaire francophone non officiel.</p>
+    <p>Contenu sous licence CC BY 4.0. Dernière mise à jour : 12 juillet 2026.</p>
+  </footer>
+</body>
+</html>
