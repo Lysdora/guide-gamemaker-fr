@@ -161,15 +161,40 @@ var _vertical = keyboard_check(ord("S")) - keyboard_check(ord("Z"));</code></pre
         <h3>Le piège de la diagonale</h3>
         <p>Ajouter directement la valeur horizontale et la valeur verticale fait parcourir davantage de distance en diagonale. On peut transformer le vecteur d'entrée en angle, puis utiliser une longueur constante.</p>
 
-        <pre><code>if (_horizontal != 0 or _vertical != 0)
+        <pre><code>var _dx = 0;
+var _dy = 0;
+
+if (_horizontal != 0 or _vertical != 0)
 {
     var _direction = point_direction(0, 0, _horizontal, _vertical);
 
-    x += lengthdir_x(move_speed, _direction);
-    y += lengthdir_y(move_speed, _direction);
+    _dx = lengthdir_x(move_speed, _direction);
+    _dy = lengthdir_y(move_speed, _direction);
+
+    x += _dx;
+    y += _dy;
 }</code></pre>
 
         <p>Avec ce système, <code>move_speed</code> représente la distance totale parcourue, quelle que soit la direction.</p>
+
+        <h3>Comprendre lengthdir</h3>
+        <p>Les fonctions <code>lengthdir_x()</code> et <code>lengthdir_y()</code> transforment une longueur et une direction en deux déplacements. La première indique combien avancer horizontalement. La seconde indique combien avancer verticalement.</p>
+
+        <table>
+          <thead><tr><th>Direction</th><th>Angle</th><th><code>_dx</code></th><th><code>_dy</code></th></tr></thead>
+          <tbody>
+            <tr><td>Droite</td><td><code>0</code></td><td><code>1</code></td><td><code>0</code></td></tr>
+            <tr><td>Haut</td><td><code>90</code></td><td><code>0</code></td><td><code>-1</code></td></tr>
+            <tr><td>Gauche</td><td><code>180</code></td><td><code>-1</code></td><td><code>0</code></td></tr>
+            <tr><td>Bas</td><td><code>270</code></td><td><code>0</code></td><td><code>1</code></td></tr>
+          </tbody>
+        </table>
+
+        <p>Écrire directement <code>x += lengthdir_x(...)</code> calcule et applique immédiatement le mouvement. Le stocker d'abord dans <code>_dx</code> et <code>_dy</code> sépare le déplacement prévu du déplacement réel. Le résultat visible est identique, mais cette séparation permettra ensuite de vérifier les collisions avant d'avancer.</p>
+
+        <div class="note">
+          <strong>À retenir.</strong> <code>_dx</code> et <code>_dy</code> ne sont pas la position du personnage. Ils représentent seulement la petite distance qu'il souhaite parcourir pendant cette frame.
+        </div>
 
         <h3>Observer les angles</h3>
         <pre><code>show_debug_message(_direction);</code></pre>
@@ -181,7 +206,7 @@ var _vertical = keyboard_check(ord("S")) - keyboard_check(ord("Z"));</code></pre
         </div>
 
         <div class="official">
-          Documentation officielle : <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Game_Input/Keyboard_Input/Keyboard_Input.htm">Keyboard Input</a> et <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Maths_And_Numbers/Angles_And_Distance/point_direction.htm">point_direction()</a>.
+          Documentation officielle : <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Game_Input/Keyboard_Input/Keyboard_Input.htm">Keyboard Input</a>, <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Maths_And_Numbers/Angles_And_Distance/point_direction.htm">point_direction()</a>, <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Maths_And_Numbers/Angles_And_Distance/lengthdir_x.htm">lengthdir_x()</a> et <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Maths_And_Numbers/Angles_And_Distance/lengthdir_y.htm">lengthdir_y()</a>.
         </div>
       </section>
 
@@ -340,14 +365,33 @@ camera_set_view_pos(_camera, _camera_x, _camera_y);</code></pre>
 
         <pre><code>move_and_collide(_dx, _dy, obj_solid);</code></pre>
 
+        <p>Les deux premières valeurs représentent le déplacement souhaité pendant cette frame. Le troisième argument indique ce qui doit bloquer l'instance. La fonction essaie donc d'avancer, recherche une collision et corrige le déplacement si elle rencontre l'obstacle.</p>
+
         <h3>Collision avec une tilemap</h3>
         <p>Une couche de tiles n'est pas un objet. Il faut d'abord récupérer son identifiant.</p>
 
         <pre><code>// Create
 collision_tilemap = layer_tilemap_get_id("Tiles_Collision");</code></pre>
 
+        <h3>Vérifier l'identifiant avant de continuer</h3>
+        <p>Un petit message de debug permet de vérifier que le nom de la couche est correct avant de modifier le mouvement.</p>
+
+        <pre><code>show_debug_message("Tilemap : " + string(collision_tilemap));</code></pre>
+
+        <p>Une sortie comme <code>ref tilemap 60</code> représente une référence valide vers une tilemap. La valeur exacte peut changer d'un projet ou d'une exécution à l'autre. Une valeur égale à <code>-1</code> indique que GameMaker n'a pas trouvé la tilemap demandée.</p>
+
+        <p>Ce message appartient au Create pour ne s'afficher qu'une fois. Placé dans le Step, il remplirait la console à chaque frame. Une fois la vérification terminée, il peut être retiré.</p>
+
+        <h3>Confier le déplacement à move_and_collide</h3>
+
         <pre><code>// Step
 move_and_collide(_dx, _dy, collision_tilemap);</code></pre>
+
+        <p>Cette ligne remplace le déplacement direct avec <code>x += _dx</code> et <code>y += _dy</code>. Il ne faut pas conserver les trois lignes ensemble, sinon le personnage avancera directement avant que la fonction de collision puisse effectuer son propre déplacement.</p>
+
+        <pre><code>// À retirer quand move_and_collide déplace déjà l'instance
+x += _dx;
+y += _dy;</code></pre>
 
         <p>Le nom de couche doit correspondre exactement au nom utilisé dans la room. Le tileset doit également posséder un sprite source et un masque utilisable pour les collisions.</p>
 
@@ -356,11 +400,25 @@ move_and_collide(_dx, _dy, collision_tilemap);</code></pre>
         </div>
 
         <div class="exercise">
-          <strong>Protocole de test.</strong> Approche un bord horizontalement, verticalement puis en diagonale. Vérifie ensuite les coins et les vitesses plus élevées.
+          <strong>Protocole de test.</strong> Approche un bord par la gauche, la droite, le haut et le bas. Marche ensuite en diagonale contre ce bord et essaie de le longer. Vérifie enfin les coins et les vitesses plus élevées.
+        </div>
+
+        <h3>Si le personnage traverse encore</h3>
+        <ul>
+          <li>vérifie que le nom transmis à <code>layer_tilemap_get_id()</code> est exactement celui de la couche ;</li>
+          <li>vérifie que l'identifiant obtenu n'est pas <code>-1</code> ;</li>
+          <li>vérifie le masque de collision du sprite du personnage ;</li>
+          <li>vérifie que le tileset possède bien un sprite source avec un masque utilisable ;</li>
+          <li>vérifie que l'option <em>Disable Source Sprite Export</em> du tileset n'empêche pas l'export du sprite nécessaire aux collisions ;</li>
+          <li>vérifie que les tiles à bloquer se trouvent réellement sur la couche utilisée pour les collisions.</li>
+        </ul>
+
+        <div class="note">
+          <strong>À retenir.</strong> Une tilemap peut servir à afficher le décor et une autre à définir les collisions. Séparer les responsabilités devient utile lorsqu'une jolie tile ne doit pas forcément être solide.
         </div>
 
         <div class="official">
-          Documentation officielle : <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Movement_And_Collisions/Collisions/place_meeting.htm">place_meeting()</a>, <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Movement_And_Collisions/Movement/move_and_collide.htm">move_and_collide()</a> et <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Movement_And_Collisions/Collisions/Collisions.htm">Collisions</a>.
+          Documentation officielle : <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Movement_And_Collisions/Collisions/place_meeting.htm">place_meeting()</a>, <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Movement_And_Collisions/Movement/move_and_collide.htm">move_and_collide()</a>, <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Asset_Management/Rooms/Tile_Map_Layers/layer_tilemap_get_id.htm">layer_tilemap_get_id()</a> et <a href="https://manual.gamemaker.io/monthly/en/GameMaker_Language/GML_Reference/Movement_And_Collisions/Collisions/Collisions.htm">Collisions</a>.
         </div>
       </section>
 
@@ -510,7 +568,7 @@ Fix pixel art camera jitter</code></pre>
 
   <footer>
     <p>GameMaker en pratique, guide communautaire francophone non officiel.</p>
-    <p>Contenu sous licence CC BY 4.0. Dernière mise à jour : 12 juillet 2026.</p>
+      <p>Contenu sous licence CC BY 4.0. Dernière mise à jour : 13 juillet 2026.</p>
   </footer>
 </body>
 </html>

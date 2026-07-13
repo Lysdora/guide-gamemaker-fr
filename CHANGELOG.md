@@ -2,6 +2,14 @@
 
 Ce fichier résume les changements importants du manuel. Les petites corrections de ponctuation ne sont pas forcément listées.
 
+## En préparation
+
+### Ajouté
+
+- une explication progressive de `lengthdir_x()`, `lengthdir_y()`, `_dx` et `_dy` pour préparer les collisions ;
+- une méthode complète pour vérifier une référence de tilemap et utiliser `move_and_collide()` ;
+- un protocole de test et une liste de vérifications pour diagnostiquer les collisions avec une tilemap ;
+
 ## 0.1.0 - 12 juillet 2026
 
 Première base publique du projet.
@@ -19,4 +27,3 @@ Première base publique du projet.
 - le Draw GUI, les PV, les dégâts et le Game Over ;
 - une introduction à Git pour les projets GameMaker ;
 - les premiers liens vers le manuel officiel.
-
